@@ -1,13 +1,19 @@
 <template>
-  <Editor :language="language" :key="foo" v-model="input" theme="vs-dark"/>
-  <!-- <textarea v-model="input" cols="30" rows="10"></textarea> -->
+<div class="row">
+  <div class="col" style="width:500px">
+    <button @click="getResult"  style="float:right;">Run</button>
+    <select @change="selectLang" v-model="selectKey" style="float:right;">
+      <option v-for="lang in languageSelect" :key="languageSelect.indexOf(lang)" :value="languageSelect.indexOf(lang)">{{ lang.language }} - {{ lang.version }}</option>
+    </select>
+    <Editor style="margin-top:30px;" :language="language" :key="foo" v-model="input" theme="vs-dark"/>
+  </div>
+  <div class="col" style="vertical-align:top;">
+    <div class="output" style="vertical-align:top; margin-top:30px;" >
+      <div v-if="isOutputExist" v-html="htmlOutput"></div>
+    </div>
+  </div>
   
-  <!-- <div>Response: {{ output }}</div> -->
-  <select @change="selectLang" v-model="selectKey">
-    <option v-for="lang in languageSelect" :key="languageSelect.indexOf(lang)" :value="languageSelect.indexOf(lang)">{{ lang.language }} - {{ lang.version }}</option>
-  </select>
-  <button @click="getResult">Run</button><br>
-  <div v-html="htmlOutput"></div>
+</div>
 </template>
 
 <script>
@@ -32,26 +38,30 @@ export default {
       languages: [
         {
           'language': 'bash',
-          'demo': 'echo "Hello, World!"'
+          'demo': 'echo "Hello, World! bash"'
         },
         {
           'language': 'c++',
-          'demo': '#include <iostream>\nusing namespace std;\nint main(){\n\tcout<<"Hello, World!";\n\treturn 0;\n}'
+          'demo': '#include <iostream>\nusing namespace std;\nint main(){\n\tcout<<"Hello, World! C++";\n\treturn 0;\n}'
         },
         {
           'language': 'python',
-          'demo': 'print("Hello, World!")'
+          'demo': 'print("Hello, World! Python")'
         },
         
       ],
       selectKey: '',
       languageSelect: [],
+      isOutputExist: false,
     }
   },
   methods: {
     async getResult(){
       const client = piston({ server: "https://emkc.org" });
       this.output = await client.execute(this.language, this.input);
+      if(this.output){
+        this.isOutputExist = true
+      }
       
     },
     async getLanguages(){
@@ -88,5 +98,23 @@ export default {
 </script>
 
 <style>
-
+.row {
+    display: table;
+    width: 100%; /*Optional*/
+    table-layout: fixed; /*Optional*/
+    border-spacing: 10px; /*Optional*/
+}
+.col {
+    display: table-cell;
+    align-content:flex-start;
+    height: 600px;
+    padding-right: 10px;
+}
+.output{
+  background: black;
+  color: white;
+  height: 500px;
+  padding: 5px 10px;
+  font-family: 'Courier New', Courier, monospace;
+}
 </style>
