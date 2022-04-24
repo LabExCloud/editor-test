@@ -1,99 +1,103 @@
 <template>
 <div class="row">
-  <div class="col" style="width:500px">
-    <button @click="getResult"  style="float:right;">Run</button>
-    <select @change="selectLang" v-model="selectKey" style="float:right;">
-      <option v-for="lang in languageSelect" :key="languageSelect.indexOf(lang)" :value="languageSelect.indexOf(lang)">{{ lang.language }} - {{ lang.version }}</option>
-    </select>
-    <Editor style="margin-top:30px;" :language="language" :key="foo" v-model="input" theme="vs-dark"/>
-  </div>
-  <div class="col" style="vertical-align:top;">
-    <div class="output" style="vertical-align:top; margin-top:30px;" >
-      <div v-if="isOutputExist" v-html="htmlOutput"></div>
+    <div class="col" style="width:500px">
+        <button @click="getResult"  style="float:right;">Run</button>
+        <select @change="selectLang" v-model="selectKey" style="float:right;">
+        <option v-for="lang in languageSelect" :key="languageSelect.indexOf(lang)" :value="languageSelect.indexOf(lang)">{{ lang.language }} - {{ lang.version }}</option>
+        </select>
+        <Editor style="margin-top: 30px; width: 500px; height: 600px" :language="language" v-model="code" theme="vs-dark"/>
     </div>
-  </div>
+    <div class="col" style="vertical-align:top;">
+        <div class="output" style="vertical-align:top; margin-top:30px;" >
+        <div v-if="isOutputExist" v-html="htmlOutput"></div>
+        </div>
+    </div>
   
 </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
 import piston from 'piston-client'
 import AnsiUp from 'ansi_up'
 import Editor from '@/components/Editor.vue'
 
 
 export default {
-  name: 'App',
-  components: {
-    Editor
-  },
-  data() {
-    return {
-      ansi: undefined,
-      output: {run: {}},
-      input: '',
-      foo: 0,
-      language: '',
-      languages: [
-        {
-          'language': 'bash',
-          'demo': 'echo "Hello, World! bash"'
-        },
-        {
-          'language': 'c++',
-          'demo': '#include <iostream>\nusing namespace std;\nint main(){\n\tcout<<"Hello, World! C++";\n\treturn 0;\n}'
-        },
-        {
-          'language': 'python',
-          'demo': 'print("Hello, World! Python")'
-        },
-        
-      ],
-      selectKey: '',
-      languageSelect: [],
-      isOutputExist: false,
-    }
-  },
-  methods: {
-    async getResult(){
-      const client = piston({ server: "https://emkc.org" });
-      this.output = await client.execute(this.language, this.input);
-      if(this.output){
-        this.isOutputExist = true
-      }
-      
+    name: 'App',
+    components: {
+        Editor
     },
-    async getLanguages(){
-      const client = piston({ server: "https://emkc.org" });
-      const runtimes = await client.runtimes();
-
-      for (const lang in runtimes) {
-        if (Object.hasOwnProperty.call(runtimes, lang)) {
-          const element = runtimes[lang];
-          if(this.languages.find(el => {return el.language === element.language}) ){
-            this.languageSelect.push(element)
-          }
+    data() {
+        return {
+        ansi: undefined,
+        output: {run: {}},
+        demo: '',
+        code: '',
+        language: '',
+        languages: [
+            {
+            'language': 'bash',
+            'demo': 'echo "Hello, World! bash"'
+            },
+            {
+            'language': 'c++',
+            'demo': '#include <iostream>\nusing namespace std;\nint main(){\n\tcout<<"Hello, World! C++";\n\treturn 0;\n}'
+            },
+            {
+            'language': 'python',
+            'demo': 'print("Hello, World! Python")'
+            },
+            
+        ],
+        selectKey: '',
+        languageSelect: [],
+        isOutputExist: false,
         }
-      }
     },
-    selectLang(){
-      this.input = this.languages[this.selectKey].demo
-      this.language = this.languages[this.selectKey].language
-      this.foo++
-    }
-  },
-  mounted(){
-    this.getLanguages()
-  },
-  computed: {
-    htmlOutput(){
-      return this.ansi.ansi_to_html(this.output.run.output).replace(/\n/gm, '<br>')
-    }
-  },
-  beforeMount () {
-    this.ansi = new AnsiUp()
-  },
+    methods: {
+        async getResult(){
+            const client = piston({ server: "https://emkc.org" });
+            this.output = await client.execute(this.language, this.code);
+            if(this.output){
+                this.isOutputExist = true
+            }
+        
+        },
+
+        async getLanguages(){
+            const client = piston({ server: "https://emkc.org" });
+            const runtimes = await client.runtimes();
+
+            for (const lang in runtimes) {
+                if (Object.hasOwnProperty.call(runtimes, lang)) {
+                    const element = runtimes[lang];
+                    if(this.languages.find(el => {return el.language === element.language}) ){
+                        this.languageSelect.push(element)
+                    }
+                }
+            }
+        },
+        selectLang(){
+            this.demo = this.languages[this.selectKey].demo
+            this.code = this.languages[this.selectKey].demo
+            this.language = this.languages[this.selectKey].language
+        },
+
+        textChange(value){
+            this.code = value
+        }
+    },
+    mounted(){
+        this.getLanguages()
+    },
+    computed: {
+        htmlOutput(){
+            return this.ansi.ansi_to_html(this.output.run.output).replace(/\n/gm, '<br>')
+        }
+    },
+    beforeMount () {
+        this.ansi = new AnsiUp()
+    },
 }
 </script>
 

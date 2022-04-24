@@ -7,7 +7,7 @@ module.exports = defineConfig({
   configureWebpack: {
     plugins: [
       new MonacoWebpackPlugin({
-        languages: ['python'],//configure your languages here
+        languages: ['python', 'bash', 'c++'],//configure your languages here
         features: ['coreCommands', 'find'],
       }), // Place it here
     ],
